@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+result.png
+CodeFormer
+checkpoints
+venv
+data
+gfp/weights/*
+weights/*
