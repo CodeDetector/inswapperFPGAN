@@ -8,5 +8,5 @@ data
 gfp/weights/*
 weights/*
 .vs
-.__pycache__ 
+__pycache__ 
 .dist
