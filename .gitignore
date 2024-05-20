@@ -7,3 +7,6 @@ venv
 data
 gfp/weights/*
 weights/*
+.vs
+.__pycache__ 
+.dist
