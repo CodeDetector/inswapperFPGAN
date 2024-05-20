@@ -1,0 +1,2 @@
+create a folder checkpoints and add https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128_fp16.onnx in there . 
+create a folder gfp/weights and add https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth  in there . 
