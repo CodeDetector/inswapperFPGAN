@@ -189,7 +189,7 @@ def process_image(frame : Image.Image,
         result = frame 
         
     result =  cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-    # print("Restoring face ....  .. .. ")
+    print("Restoring face ....  .. .. ")
     
     
     return result 
