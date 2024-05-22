@@ -1,2 +1,7 @@
 create a folder checkpoints and add https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128_fp16.onnx in there . 
 create a folder gfp/weights and add https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth  in there . 
+
+CUDA version - 12.4 
+CuDNN version - 8.9.2.26 
+python version - 3.10.9 
+torch version - 2.3.0 

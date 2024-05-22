@@ -44,7 +44,7 @@ build:
     - "facexlib==0.3.0"
     - "setuptools==69.5.1"
     - "git+https://github.com/CodeDetector/BasicSR.git"
-    - "pydantic"
+    - "pydantic==2.7.1"
   # commands run after the environment is setup
   # run:
   #   - "echo env is ready!"
