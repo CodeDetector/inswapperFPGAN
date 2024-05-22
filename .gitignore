@@ -11,4 +11,4 @@ weights/*
 __pycache__ 
 .dist
 .cog 
-images 
+images/ 
