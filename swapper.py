@@ -3,7 +3,7 @@ This project is developed by Haofan Wang to support face swap in single frame. M
 
 It is highly built on the top of insightface, sd-webui-roop and CodeFormer.
 """
-
+from gfp import bg_sampler 
 import os
 import cv2
 import copy
@@ -14,10 +14,9 @@ import numpy as np
 from PIL import Image
 from typing import List, Union, Dict, Set, Tuple
 import matplotlib.pyplot as plt 
-from gfp import bg_sampler 
 import torch 
-from basicsr.archs.rrdbnet_arch import RRDBNet
-from realesrgan import RealESRGANer
+# from basicsr.archs.rrdbnet_arch import RRDBNet
+# from realesrgan import RealESRGANer
 import cv2 
 from gfp.utils import GFPGANer 
 
@@ -33,18 +32,6 @@ def calc_face_distance(face , reference_face ) -> float:
 
 
 
-def getFaceSwapModel(model_path: str):
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = insightface.model_zoo.get_model(model_path)
-    return model
-
-
-def getFaceAnalyser(model_path: str, providers,
-                    det_size=(320, 320)):
-    print("The provider is : " , providers)
-    face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", root="./checkpoints", providers=providers)
-    face_analyser.prepare(ctx_id=0, det_size=det_size)
-    return face_analyser
 
 
 def get_one_face(face_analyser,
@@ -119,22 +106,22 @@ def create_video(new_frames ) :
     out.release()
 
     
-def process_video(video_path , target_img_path , reference_img_path, model , restore , bg_upsampler  ) : 
+def process_video(video_path , target_img_path , reference_img_path, model , restore , bg_upsampler ,face_analyser ,face_swapper , restorer) : 
     
    
-    target_imgs = [Image.open(img_path) for img_path in target_img_path]
-    reference_imgs = [Image.open(img_path) for img_path in reference_img_path]
+    target_imgs = [Image.open(target_img_path) ]
+    reference_imgs = [Image.open(reference_img_path)]
     
     # print("These are the target images " , target_imgs[0] )
-    providers = onnxruntime.get_available_providers()
+    # providers = onnxruntime.get_available_providers()
 
     # load face_analyser
-    face_analyser = getFaceAnalyser(model, providers)
+    # face_analyser = getFaceAnalyser(model, providers)
     
-    # load face_swapper
-    model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), model)
+    # # load face_swapper
+    # model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), model)
     
-    face_swapper = getFaceSwapModel(model_path)
+    # face_swapper = getFaceSwapModel(model_path)
     
     frames = get_video_frame(video_path)
     
@@ -143,8 +130,8 @@ def process_video(video_path , target_img_path , reference_img_path, model , res
     target_faces = [get_one_face(face_analyser= face_analyser  , frame=cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)) for img in target_imgs]  
     reference_faces = [get_one_face(face_analyser= face_analyser  , frame=cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)) for img in reference_imgs ] 
     
-    bg_tile = 400 
-    model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
+    # bg_tile = 400 
+    # model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
     # GFPGan version default = 1.3 
     arch = 'clean'
     channel_multiplier = 2
@@ -152,29 +139,29 @@ def process_video(video_path , target_img_path , reference_img_path, model , res
     # url = 'https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth'
     
     model_path = os.path.join('./gfp/weights/' +  model_name + '.pth')
-    restorer = None 
-    if bg_upsampler  : 
-        bg_upsampler = RealESRGANer(
-        scale=2,
-        model_path='https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth',
-        model=model,
-        # bg_tile default = 400 
-        tile=bg_tile,
-        tile_pad=10,
-        pre_pad=0,
-        half=False)
-        restorer = GFPGANer(
-            model_path=model_path,
-            upscale=2,
-            arch=arch,
-            channel_multiplier=channel_multiplier , 
-            bg_upsampler= bg_upsampler)
-    else : 
-        restorer = GFPGANer(
-            model_path=model_path,
-            upscale=2,
-            arch=arch,
-            channel_multiplier=channel_multiplier )
+    # restorer = None 
+    # if bg_upsampler  : 
+    #     bg_upsampler = RealESRGANer(
+    #     scale=2,
+    #     model_path='https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth',
+    #     model=model,
+    #     # bg_tile default = 400 
+    #     tile=bg_tile,
+    #     tile_pad=10,
+    #     pre_pad=0,
+    #     half=False)
+    #     restorer = GFPGANer(
+    #         model_path=model_path,
+    #         upscale=2,
+    #         arch=arch,
+    #         channel_multiplier=channel_multiplier , 
+    #         bg_upsampler= bg_upsampler)
+    # else : 
+    # restorer = GFPGANer(
+    #     model_path=model_path,
+    #     upscale=2,
+    #     arch=arch,
+    #     channel_multiplier=channel_multiplier )
         
     if isinstance(frames , list) and len(frames) : 
         for idx, frame in enumerate(frames) : 
@@ -183,7 +170,7 @@ def process_video(video_path , target_img_path , reference_img_path, model , res
             print(f"Restoring image {idx}")
             img = bg_sampler(img , restorer= restorer) 
             print(f"Saving image {idx}") 
-            cv2.imwrite("./images"+str(idx)+".png",img)
+            cv2.imwrite("images/"+str(idx)+".png",img)
             del img
     else : 
         return 0 
@@ -220,7 +207,7 @@ def process_image(frame : Image.Image,
                             frame
                         )
                         break 
-    print("face ....  .. .. ")
+    # print("face ....  .. .. ")
     
     
     return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

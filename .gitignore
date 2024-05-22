@@ -10,3 +10,4 @@ weights/*
 .vs
 __pycache__ 
 .dist
+.cog 
